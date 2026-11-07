@@ -10,6 +10,10 @@
 
 ## 本地开发
 
+最简单的方式：Windows 双击 `start.bat`，macOS / Linux 运行 `./start.sh`。脚本会在首次运行时自动安装依赖，然后启动开发服务器并打开 http://localhost:4321/ 。加参数 `preview` 可以构建后预览正式版本，加 `build` 则只构建。
+
+手动运行：
+
 ```bash
 npm install
 npm run dev      # 开发模式：http://localhost:4321/
