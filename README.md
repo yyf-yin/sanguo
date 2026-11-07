@@ -6,14 +6,15 @@
 
 - [Astro](https://astro.build/) 5：纯静态输出，无需后端
 - 内容使用 Markdown（Astro Content Collections），新增人物/事件只需加一个 `.md` 文件
-- GitHub Actions 自动部署到 GitHub Pages：<https://yyf-yin.github.io/sanguo/>
+- 构建产物是纯静态文件（`dist/`），可直接部署到自己的服务器
 
 ## 本地开发
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321/sanguo/
-npm run build    # 输出到 dist/
+npm run dev      # 开发模式：http://localhost:4321/
+npm run build    # 构建到 dist/
+npm run preview  # 本地预览构建结果：http://localhost:4321/
 ```
 
 ## 目录结构
@@ -53,6 +54,20 @@ order: 12            # 列表排序，越小越靠前
 
 **新增事件**：在 `src/content/events/` 新建 `xxx.md`，字段见 `src/content.config.ts`，其中 `people` 填人物文件名（如 `[cao-cao, liu-bei]`），会自动在双方页面互相链接。
 
-## 首次部署
+## 部署到服务器
 
-仓库 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**，之后每次合并到 `main` 都会自动发布。
+`npm run build` 后把 `dist/` 目录上传到服务器，用 Nginx 等指向它即可，例如：
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/sanguo/dist;
+    location / {
+        try_files $uri $uri/ $uri.html =404;
+    }
+    error_page 404 /404.html;
+}
+```
+
+如果要放在子路径下（如 `/sanguo/`），在 `astro.config.mjs` 里设置 `base: '/sanguo'` 后重新构建。
