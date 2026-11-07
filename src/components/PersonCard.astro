@@ -1,0 +1,17 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { factions } from '../data/factions';
+import { lifespan, url } from '../utils';
+interface Props { person: CollectionEntry<'people'> }
+const { person } = Astro.props;
+const p = person.data;
+const f = factions[p.faction];
+---
+<a class="card person-card" href={url(`/people/${person.id}`)} data-faction={p.faction} style={`--c:${f.color}`}>
+  <div class="avatar" aria-hidden="true">{p.name.slice(-1)}</div>
+  <div>
+    <h3>{p.name}{p.courtesy && <span class="courtesy">字{p.courtesy}</span>}</h3>
+    <p class="meta">{f.full} · {lifespan(p.born, p.died)}</p>
+    <p class="desc">{p.title}</p>
+  </div>
+</a>

@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PersonCard from '../components/PersonCard.astro';
+import EventItem from '../components/EventItem.astro';
+import { kingdoms } from '../data/factions';
+import { url } from '../utils';
+
+const people = (await getCollection('people')).sort((a, b) => a.data.order - b.data.order).slice(0, 6);
+const events = (await getCollection('events')).sort((a, b) => a.data.year - b.data.year);
+const highlights = events.filter((e) => ['guandu', 'chibi', 'yiling', 'fall-of-wu'].includes(e.id));
+---
+<Base>
+  <section class="hero">
+    <div class="kicker">公元 184 — 280</div>
+    <h1>三国史话</h1>
+    <p>从黄巾起义到三国归晋，近百年间群雄逐鹿、魏蜀吴三分天下。本站以正史为本，带你看清那段历史的来龙去脉。</p>
+    <div class="actions">
+      <a class="btn primary" href={url('/timeline')}>浏览时间线</a>
+      <a class="btn" href={url('/people')}>认识人物</a>
+    </div>
+  </section>
+
+  <h2>三分天下</h2>
+  <div class="grid">
+    {kingdoms.map((k) => (
+      <a class="card kingdom-card" href={url(`/factions#${k.id}`)} style={`--c:${k.color}`}>
+        <div class="big">{k.name}</div>
+        <h3>{k.full}</h3>
+        <p class="desc">{k.intro}</p>
+        <dl>
+          <dt>存续</dt><dd>{k.span}</dd>
+          <dt>都城</dt><dd>{k.capital}</dd>
+        </dl>
+      </a>
+    ))}
+  </div>
+
+  <h2>关键转折</h2>
+  <ul class="timeline">
+    {highlights.map((e) => <EventItem event={e} />)}
+  </ul>
+  <p><a href={url('/timeline')}>查看完整时间线 →</a></p>
+
+  <h2>风云人物</h2>
+  <div class="grid">
+    {people.map((p) => <PersonCard person={p} />)}
+  </div>
+  <p><a href={url('/people')}>查看全部人物 →</a></p>
+</Base>

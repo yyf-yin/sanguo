@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { factions } from '../data/factions';
+import { url } from '../utils';
+
+const people = (await getCollection('people')).sort((a, b) => a.data.order - b.data.order);
+const order = ['han', 'wei', 'shu', 'wu', 'qun', 'jin'] as const;
+---
+<Base title="势力" description="东汉、魏、蜀、吴、群雄与西晋">
+  <h1>势力</h1>
+  <p class="muted">从东汉崩解到三国鼎立，再到西晋一统。</p>
+  {order.map((id) => {
+    const f = factions[id];
+    const members = people.filter((p) => p.data.faction === id);
+    return (
+      <section id={id} class="card kingdom-card" style={`--c:${f.color}; margin-top:20px`}>
+        <div style="display:flex;gap:16px;align-items:center">
+          <div class="big">{f.name}</div>
+          <div>
+            <h3>{f.full}</h3>
+            <p class="meta">
+              {[f.span && `存续 ${f.span}`, f.capital && `都城 ${f.capital}`, f.founder && `建立者 ${f.founder}`].filter(Boolean).join(' · ')}
+            </p>
+          </div>
+        </div>
+        <p>{f.intro}</p>
+        {members.length > 0 && (
+          <p class="meta">
+            代表人物：{members.map((p, i) => <>{i > 0 && '、'}<a href={url(`/people/${p.id}`)}>{p.data.name}</a></>)}
+          </p>
+        )}
+      </section>
+    );
+  })}
+</Base>

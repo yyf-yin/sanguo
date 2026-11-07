@@ -1,0 +1,61 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FactionTag from '../../components/FactionTag.astro';
+import { factions } from '../../data/factions';
+import { lifespan, url, yearRange } from '../../utils';
+
+export async function getStaticPaths() {
+  const people = await getCollection('people');
+  return people.map((person) => ({ params: { id: person.id }, props: { person } }));
+}
+
+const { person } = Astro.props as { person: CollectionEntry<'people'> };
+const p = person.data;
+const { Content } = await render(person);
+const related = (await getCollection('events'))
+  .filter((e) => e.data.people.some((r) => r.id === person.id))
+  .sort((a, b) => a.data.year - b.data.year);
+const peers = (await getCollection('people'))
+  .filter((o) => o.data.faction === p.faction && o.id !== person.id)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+<Base title={p.name} description={p.summary}>
+  <div class="breadcrumb"><a href={url('/people')}>人物</a> / {p.name}</div>
+  <header class="detail-head">
+    <h1>{p.name}{p.courtesy && <span class="courtesy">字{p.courtesy}</span>}</h1>
+    <FactionTag id={p.faction} full />
+    <p class="lead">{p.summary}</p>
+    <div class="facts">
+      <span><b>生卒</b>{lifespan(p.born, p.died)}</span>
+      {p.hometown && <span><b>籍贯</b>{p.hometown}</span>}
+      <span><b>身份</b>{p.title}</span>
+    </div>
+  </header>
+  <div class="detail">
+    <article class="prose">
+      <Content />
+      {p.novelNote && <div class="note"><strong>史实与演义</strong><br />{p.novelNote}</div>}
+    </article>
+    <aside>
+      {related.length > 0 && (
+        <>
+          <h2>相关事件</h2>
+          <ul>
+            {related.map((e) => (
+              <li><a href={url(`/events/${e.id}`)}>{e.data.title}</a><span class="meta">{yearRange(e.data.year, e.data.endYear)} · {e.data.era}</span></li>
+            ))}
+          </ul>
+        </>
+      )}
+      {peers.length > 0 && (
+        <>
+          <h2>同属{factions[p.faction].full}</h2>
+          <ul>
+            {peers.map((o) => <li><a href={url(`/people/${o.id}`)}>{o.data.name}</a><span class="meta">{o.data.title}</span></li>)}
+          </ul>
+        </>
+      )}
+    </aside>
+  </div>
+</Base>

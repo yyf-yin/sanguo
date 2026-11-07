@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FactionTag from '../../components/FactionTag.astro';
+import { url, yearRange } from '../../utils';
+
+const events = (await getCollection('events')).sort((a, b) => a.data.year - b.data.year);
+const battles = events.filter((e) => e.data.kind === '战役');
+const others = events.filter((e) => e.data.kind !== '战役');
+const groups = [
+  { title: '著名战役', list: battles },
+  { title: '政治与人物大事', list: others },
+];
+---
+<Base title="战役与大事" description="三国时期著名战役与重大政治事件">
+  <h1>战役与大事</h1>
+  {groups.map((g) => (
+    <section>
+      <h2>{g.title}</h2>
+      <div class="grid">
+        {g.list.map((e) => (
+          <a class="card" href={url(`/events/${e.id}`)}>
+            <p class="meta">{yearRange(e.data.year, e.data.endYear)} · {e.data.era}{e.data.location && ` · ${e.data.location}`}</p>
+            <h3>{e.data.title}</h3>
+            <p class="desc">{e.data.summary}</p>
+            <div class="tags">{e.data.factions.map((id) => <FactionTag id={id} />)}</div>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+</Base>

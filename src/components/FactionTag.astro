@@ -1,0 +1,7 @@
+---
+import { factions, type FactionId } from '../data/factions';
+interface Props { id: FactionId; full?: boolean }
+const { id, full = false } = Astro.props;
+const f = factions[id];
+---
+<span class="tag" style={`--c:${f.color}`}>{full ? f.full : f.name}</span>
