@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FactionTag from './FactionTag.astro';
+import { url, yearRange } from '../utils';
+interface Props { event: CollectionEntry<'events'> }
+const { event } = Astro.props;
+const e = event.data;
+---
+<li class="tl-item" data-kind={e.kind}>
+  <div class="tl-year">{yearRange(e.year, e.endYear)}<span>{e.era}</span></div>
+  <div class="tl-body">
+    <h3><a href={url(`/events/${event.id}`)}>{e.title}</a> <span class={`kind kind-${e.kind}`}>{e.kind}</span></h3>
+    <p>{e.summary}</p>
+    <div class="tags">{e.factions.map((id) => <FactionTag id={id} />)}</div>
+  </div>
+</li>

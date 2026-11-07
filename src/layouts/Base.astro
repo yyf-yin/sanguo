@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+import { url } from '../utils';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = '以《三国志》等正史为本，梳理东汉末年至西晋统一的人物、战役与大事。' } = Astro.props;
+const fullTitle = title ? `${title} · 三国史话` : '三国史话 · 东汉末年至三国归晋';
+const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
+const nav = [
+  { href: '/', label: '首页' },
+  { href: '/timeline', label: '时间线' },
+  { href: '/people', label: '人物' },
+  { href: '/events', label: '战役与大事' },
+  { href: '/factions', label: '势力' },
+  { href: '/about', label: '史料说明' },
+];
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href={url('/')}>
+          <span class="seal" aria-hidden="true"><span>三</span><span>國</span></span>
+          <span class="brand-text">三国史话</span>
+        </a>
+        <nav aria-label="主导航">
+          <ul>
+            {nav.map((n) => (
+              <li><a href={url(n.href)} aria-current={isActive(n.href) ? 'page' : undefined}>{n.label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>本站内容以陈寿《三国志》、裴松之注、《后汉书》《资治通鉴》为主要依据；与《三国演义》不同之处会特别注明。</p>
+        <p class="muted">“天下大势，分久必合，合久必分。”</p>
+      </div>
+    </footer>
+  </body>
+</html>

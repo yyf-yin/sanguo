@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import EventItem from '../components/EventItem.astro';
+
+const events = (await getCollection('events')).sort((a, b) => a.data.year - b.data.year);
+const eras = [
+  { name: '东汉末年 · 群雄逐鹿', from: 184, to: 219, desc: '黄巾起义动摇汉室根基，董卓乱政后诸侯割据，曹操、刘备、孙权逐渐崛起。' },
+  { name: '三国鼎立', from: 220, to: 262, desc: '曹丕、刘备、孙权相继称帝，魏蜀吴三国并立，北伐与内斗交织。' },
+  { name: '三国归晋', from: 263, to: 280, desc: '魏灭蜀，司马炎代魏建晋，最终灭吴统一天下。' },
+];
+---
+<Base title="时间线" description="东汉末年至西晋统一的大事年表">
+  <h1>时间线</h1>
+  <p class="muted">按年份排列的重大事件。年份为公历，括注为当时年号。</p>
+  <div class="filters" role="group" aria-label="按类型筛选">
+    {['全部', '战役', '政治', '人物'].map((k, i) => (
+      <button type="button" data-filter={k} aria-pressed={i === 0 ? 'true' : 'false'}>{k}</button>
+    ))}
+  </div>
+  {eras.map((era) => (
+    <section>
+      <h2 class="era-heading">{era.name}（{era.from}–{era.to}）</h2>
+      <p>{era.desc}</p>
+      <ul class="timeline">
+        {events.filter((e) => e.data.year >= era.from && e.data.year <= era.to).map((e) => <EventItem event={e} />)}
+      </ul>
+    </section>
+  ))}
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.filter;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        document.querySelectorAll<HTMLElement>('.tl-item').forEach((el) => {
+          el.hidden = f !== '全部' && el.dataset.kind !== f;
+        });
+      }),
+    );
+  </script>
+</Base>

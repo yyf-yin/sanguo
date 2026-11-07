@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../utils';
+---
+<Base title="页面未找到">
+  <section class="hero">
+    <h1>此路不通</h1>
+    <p>你要找的页面似乎已“败走麦城”。</p>
+    <div class="actions"><a class="btn primary" href={url('/')}>返回首页</a></div>
+  </section>
+</Base>

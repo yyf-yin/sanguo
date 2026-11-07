@@ -1,0 +1,54 @@
+---
+import { getCollection, getEntries, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FactionTag from '../../components/FactionTag.astro';
+import { lifespan, url, yearRange } from '../../utils';
+
+export async function getStaticPaths() {
+  const events = (await getCollection('events')).sort((a, b) => a.data.year - b.data.year);
+  return events.map((event, i) => ({
+    params: { id: event.id },
+    props: { event, prev: events[i - 1], next: events[i + 1] },
+  }));
+}
+
+type E = CollectionEntry<'events'>;
+const { event, prev, next } = Astro.props as { event: E; prev?: E; next?: E };
+const e = event.data;
+const { Content } = await render(event);
+const people = await getEntries(e.people);
+---
+<Base title={e.title} description={e.summary}>
+  <div class="breadcrumb"><a href={url('/events')}>战役与大事</a> / {e.title}</div>
+  <header class="detail-head">
+    <h1>{e.title}</h1>
+    <div class="tags">{e.factions.map((id) => <FactionTag id={id} full />)}</div>
+    <p class="lead">{e.summary}</p>
+    <div class="facts">
+      <span><b>时间</b>{yearRange(e.year, e.endYear)}（{e.era}）</span>
+      {e.location && <span><b>地点</b>{e.location}</span>}
+      <span><b>类型</b>{e.kind}</span>
+    </div>
+  </header>
+  <div class="detail">
+    <article class="prose">
+      <Content />
+      {e.outcome && <div class="note"><strong>影响</strong><br />{e.outcome}</div>}
+      <p class="muted">
+        {prev && <a href={url(`/events/${prev.id}`)}>← {prev.data.title}</a>}
+        {prev && next && '　|　'}
+        {next && <a href={url(`/events/${next.id}`)}>{next.data.title} →</a>}
+      </p>
+    </article>
+    <aside>
+      {people.length > 0 && (
+        <>
+          <h2>相关人物</h2>
+          <ul>
+            {people.map((p) => <li><a href={url(`/people/${p.id}`)}>{p.data.name}</a><span class="meta">{lifespan(p.data.born, p.data.died)} · {p.data.title}</span></li>)}
+          </ul>
+        </>
+      )}
+    </aside>
+  </div>
+</Base>
